@@ -1,0 +1,1456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RS Partnership - Proposal & Quote Builder</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.min.js"></script>
+    <style>
+        :root {
+            --rs-purple: #7030A0;
+            --rs-purple-dark: #5a248a;
+            --rs-gray: #f5f5f5;
+            --rs-border: #e0e0e0;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background: var(--rs-gray);
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--rs-purple) 0%, var(--rs-purple-dark) 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 { margin: 0; font-size: 2rem; }
+        .header p { margin: 0.5rem 0 0 0; opacity: 0.95; }
+
+        .tabs-container {
+            background: white;
+            border-bottom: 2px solid var(--rs-border);
+            display: flex;
+            gap: 0;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex-wrap: wrap;
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            flex: 0 1 auto;
+            min-width: 130px;
+            padding: 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #666;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover { color: var(--rs-purple); }
+        .tab-button.active { color: var(--rs-purple); border-bottom-color: var(--rs-purple); }
+
+        .container { max-width: 1200px; margin: 2rem auto; padding: 0 1rem; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 2rem;
+            border: 1px solid var(--rs-border);
+            margin-bottom: 2rem;
+        }
+
+        .card h2 {
+            color: var(--rs-purple);
+            margin-top: 0;
+            border-bottom: 2px solid #f0e8ff;
+            padding-bottom: 1rem;
+        }
+
+        .card h3 { color: var(--rs-purple); }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-row-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--rs-border);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--rs-purple);
+            box-shadow: 0 0 0 3px rgba(112, 48, 160, 0.1);
+        }
+
+        .form-group textarea { min-height: 100px; }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .table th {
+            background: #f9f5ff;
+            color: var(--rs-purple);
+            padding: 1rem;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--rs-border);
+        }
+
+        .table td {
+            padding: 0.75rem;
+            border-bottom: 1px solid var(--rs-border);
+        }
+
+        .table tr:hover { background: #fafafa; }
+
+        .btn {
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--rs-purple);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--rs-purple-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(112, 48, 160, 0.3);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--rs-purple);
+            border: 2px solid var(--rs-purple);
+        }
+
+        .btn-secondary:hover { background: #f9f5ff; }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+            margin-left: 0.5rem;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger:hover { background: #c82333; }
+
+        .btn-edit {
+            background: #28a745;
+            color: white;
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-edit:hover { background: #218838; }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn-group button { flex: 1; }
+
+        .service-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: white;
+            border-radius: 4px;
+            border: 1px solid var(--rs-border);
+            margin-bottom: 0.75rem;
+        }
+
+        .service-checkbox input { width: auto; cursor: pointer; }
+        .service-checkbox label { margin: 0; cursor: pointer; flex: 1; }
+
+        .tier-section {
+            background: #f9f5ff;
+            padding: 2rem;
+            border-radius: 8px;
+            border-left: 4px solid var(--rs-purple);
+            margin-bottom: 2rem;
+        }
+
+        .tier-box {
+            background: white;
+            border: 2px solid var(--rs-border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tier-box h4 { color: var(--rs-purple); margin-top: 0; }
+
+        .price-summary {
+            background: #fff8f3;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #ffd700;
+            margin-top: 2rem;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 0.95rem;
+        }
+
+        .price-row.total {
+            border-bottom: none;
+            border-top: 2px solid var(--rs-purple);
+            padding-top: 1rem;
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--rs-purple);
+        }
+
+        .price-row.annual {
+            color: #666;
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        .success-msg {
+            position: fixed;
+            top: 2rem;
+            right: 2rem;
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem 1.5rem;
+            border-radius: 6px;
+            border: 1px solid #c3e6cb;
+            z-index: 2000;
+            animation: slideIn 0.3s ease, slideOut 0.3s ease 3.7s forwards;
+        }
+
+        @keyframes slideIn { from { transform: translateX(400px); } to { transform: translateX(0); } }
+        @keyframes slideOut { from { transform: translateX(0); } to { transform: translateX(400px); } }
+
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #0066cc;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            color: #004085;
+        }
+
+        .quote-item {
+            background: white;
+            border: 1px solid var(--rs-border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .quote-info h4 { margin: 0 0 0.5rem 0; color: var(--rs-purple); }
+        .quote-info p { margin: 0.25rem 0; color: #666; font-size: 0.9rem; }
+
+        .quote-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-draft { background: #e2e3e5; color: #383d41; }
+        .status-sent { background: #cce5ff; color: #004085; }
+        .status-agreed { background: #d4edda; color: #155724; }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 3000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-y: auto;
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 3% auto;
+            padding: 2rem;
+            border-radius: 8px;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 2rem;
+            font-weight: bold;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover { color: #000; }
+
+        .modal-header {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--rs-purple);
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>RS Partnership</h1>
+        <p>Proposal & Quote Builder — All-in-One Platform</p>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-button active" onclick="switchTab('sales-menu', this)">📋 Sales Menu</button>
+        <button class="tab-button" onclick="switchTab('three-tier', this)">🥉🥈🥇 3-Tier</button>
+        <button class="tab-button" onclick="switchTab('single-tier', this)">📄 Single Tier</button>
+        <button class="tab-button" onclick="switchTab('quote-database', this)">💾 Quote Database</button>
+    </div>
+
+    <!-- ============ SALES MENU TAB ============ -->
+    <div id="sales-menu" class="tab-content active">
+        <div class="container">
+            <div class="card">
+                <h2>Sales Menu - Editable Pricing</h2>
+                <p style="color: #666;">Edit all services, one-off fees, and software. Changes save to your browser automatically.</p>
+
+                <div style="margin-bottom: 2rem;">
+                    <h3>Core Services (Monthly Impact)</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Service Name</th>
+                                <th>Monthly Impact (£)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="servicesTable"></tbody>
+                    </table>
+                    <button class="btn btn-secondary" onclick="openServiceModal('add')">+ Add Service</button>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h3>One-Off Fees</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Fee Name</th>
+                                <th>Amount (£)</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="oneOffTable"></tbody>
+                    </table>
+                    <button class="btn btn-secondary" onclick="openOneOffModal('add')">+ Add Fee</button>
+                </div>
+
+                <div style="margin-bottom: 2rem;">
+                    <h3>Software Add-Ons (Monthly)</h3>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Software Name</th>
+                                <th>Monthly Cost (£)</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="softwareTable"></tbody>
+                    </table>
+                    <button class="btn btn-secondary" onclick="openSoftwareModal('add')">+ Add Software</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ 3-TIER TAB ============ -->
+    <div id="three-tier" class="tab-content">
+        <div class="container">
+            <div class="card">
+                <h2>3-Tier Proposal Builder</h2>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Client Name / Company *</label>
+                        <input type="text" id="c3_clientName" placeholder="e.g. Acme Limited" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Person</label>
+                        <input type="text" id="c3_contactName" placeholder="e.g. John Smith">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="c3_clientEmail" placeholder="john@acme.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" id="c3_clientPhone" placeholder="">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Business Type *</label>
+                        <select id="c3_businessType" required>
+                            <option value="">-- Select --</option>
+                            <option value="Limited Company">Limited Company</option>
+                            <option value="Sole Trader">Sole Trader</option>
+                            <option value="Partnership">Partnership</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Approximate Turnover</label>
+                        <input type="text" id="c3_turnover" placeholder="e.g. £250,000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Client Position / Context</label>
+                    <textarea id="c3_clientPosition" placeholder="Describe their current situation, challenges, why they need your services..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Recommendation / Solution</label>
+                    <textarea id="c3_recommendation" placeholder="What you recommend to solve their problems and help them..."></textarea>
+                </div>
+
+                <div class="card" style="background: #f9f5ff; margin-top: 2rem;">
+                    <h3>Set Base Monthly Pricing</h3>
+                    <div class="form-row-3">
+                        <div class="form-group">
+                            <label for="c3_bronzeBase">🥉 Bronze Base (£)</label>
+                            <input type="number" id="c3_bronzeBase" value="199" step="1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="c3_silverBase">🥈 Silver Base (£)</label>
+                            <input type="number" id="c3_silverBase" value="299" step="1" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="c3_goldBase">🥇 Gold Base (£)</label>
+                            <input type="number" id="c3_goldBase" value="399" step="1" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="background: #fff8f3; margin-top: 2rem;">
+                    <h3>One-Off Costs (Optional)</h3>
+                    <div id="c3_oneOffSelection"></div>
+                </div>
+
+                <div class="card" style="background: #f0f8ff; margin-top: 2rem;">
+                    <h3>Select Services for Each Tier</h3>
+                    
+                    <div class="tier-box">
+                        <h4>🥉 BRONZE TIER</h4>
+                        <div id="c3_bronzeCheckboxes"></div>
+                        <div id="c3_bronzePrice" class="price-summary"></div>
+                    </div>
+
+                    <div class="tier-box">
+                        <h4>🥈 SILVER TIER</h4>
+                        <div id="c3_silverCheckboxes"></div>
+                        <div id="c3_silverPrice" class="price-summary"></div>
+                    </div>
+
+                    <div class="tier-box">
+                        <h4>🥇 GOLD TIER</h4>
+                        <div id="c3_goldCheckboxes"></div>
+                        <div id="c3_goldPrice" class="price-summary"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Generate & Save</h2>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="generate3TierProposal()">📄 Generate Word Document</button>
+                    <button class="btn btn-primary" onclick="save3TierQuote()">💾 Save Quote</button>
+                    <button class="btn btn-secondary" onclick="clear3TierForm()">🔄 Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ SINGLE-TIER TAB ============ -->
+    <div id="single-tier" class="tab-content">
+        <div class="container">
+            <div class="card">
+                <h2>Single Tier Proposal Builder</h2>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Client Name / Company *</label>
+                        <input type="text" id="c1_clientName" placeholder="e.g. Acme Limited" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Contact Person</label>
+                        <input type="text" id="c1_contactName" placeholder="e.g. John Smith">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" id="c1_clientEmail" placeholder="john@acme.com">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" id="c1_clientPhone" placeholder="">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Business Type *</label>
+                        <select id="c1_businessType" required>
+                            <option value="">-- Select --</option>
+                            <option value="Limited Company">Limited Company</option>
+                            <option value="Sole Trader">Sole Trader</option>
+                            <option value="Partnership">Partnership</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Approximate Turnover</label>
+                        <input type="text" id="c1_turnover" placeholder="e.g. £250,000">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Client Position / Context</label>
+                    <textarea id="c1_clientPosition" placeholder="Describe their situation..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Recommendation / Solution</label>
+                    <textarea id="c1_recommendation" placeholder="What you recommend..."></textarea>
+                </div>
+
+                <div class="card" style="background: #f9f5ff; margin-top: 2rem;">
+                    <h3>Package Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="c1_packageName">Package Name</label>
+                            <input type="text" id="c1_packageName" value="Standard Service Package">
+                        </div>
+                        <div class="form-group">
+                            <label for="c1_basePrice">Base Monthly Price (£)</label>
+                            <input type="number" id="c1_basePrice" value="299" step="1" min="0">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="background: #f0f8ff; margin-top: 2rem;">
+                    <h3>Select Services to Include</h3>
+                    <div id="c1_checkboxes"></div>
+                    <div id="c1_pricePreview" class="price-summary"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>Generate & Save</h2>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="generate1TierProposal()">📄 Generate Word Document</button>
+                    <button class="btn btn-primary" onclick="save1TierQuote()">💾 Save Quote</button>
+                    <button class="btn btn-secondary" onclick="clear1TierForm()">🔄 Clear</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ QUOTE DATABASE TAB ============ -->
+    <div id="quote-database" class="tab-content">
+        <div class="container">
+            <div class="card">
+                <h2>💾 Saved Quotes Database</h2>
+                <p style="color: #666;">All quotes are saved locally in your browser. You can view, edit, duplicate, delete, or export them.</p>
+
+                <div style="display: flex; gap: 1rem; margin-bottom: 2rem;">
+                    <button class="btn btn-secondary" onclick="exportAllQuotes()">📥 Export All Quotes (JSON)</button>
+                    <button class="btn btn-secondary" onclick="triggerImportQuotes()">📤 Import Quotes (JSON)</button>
+                    <input type="file" id="importFile" style="display:none;" accept=".json" onchange="importAllQuotes(event)">
+                </div>
+
+                <div id="quotesContainer" style="min-height: 200px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ MODALS ============ -->
+    <div id="serviceModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeServiceModal()">&times;</span>
+            <div class="modal-header">Add/Edit Service</div>
+            <form onsubmit="saveService(event)">
+                <div class="form-group">
+                    <label>Service Name *</label>
+                    <input type="text" id="serviceName" required>
+                </div>
+                <div class="form-group">
+                    <label>Monthly Impact (£) *</label>
+                    <input type="number" id="servicePrice" step="0.01" min="0" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Service</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="oneOffModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeOneOffModal()">&times;</span>
+            <div class="modal-header">Add/Edit One-Off Fee</div>
+            <form onsubmit="saveOneOff(event)">
+                <div class="form-group">
+                    <label>Fee Name *</label>
+                    <input type="text" id="oneOffName" required>
+                </div>
+                <div class="form-group">
+                    <label>Amount (£) *</label>
+                    <input type="number" id="oneOffPrice" step="0.01" min="0" required>
+                </div>
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="oneOffDesc" style="min-height: 60px;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Fee</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="softwareModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeSoftwareModal()">&times;</span>
+            <div class="modal-header">Add/Edit Software</div>
+            <form onsubmit="saveSoftware(event)">
+                <div class="form-group">
+                    <label>Software Name *</label>
+                    <input type="text" id="softwareName" required>
+                </div>
+                <div class="form-group">
+                    <label>Monthly Cost (£) *</label>
+                    <input type="number" id="softwarePrice" step="0.01" min="0" required>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Save Software</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="success-msg" id="successMsg" style="display:none;">✓ Success!</div>
+
+    <script>
+        // ============ APP DATA ============
+        let app = {
+            services: [
+                { name: 'Annual Accounts & Confirmation Statement', price: 0 },
+                { name: 'General Accounting & Tax Advice', price: 0 },
+                { name: '1 Meeting per year', price: 0 },
+                { name: 'Personal Tax Return (per director)', price: 0 },
+                { name: 'Monthly Payroll (1-5 employees)', price: 40 },
+                { name: '6-Month Management Accounts', price: 0 },
+                { name: 'Quarterly VAT Check & Submission', price: 50 },
+                { name: 'Monthly CIS Returns', price: 30 },
+                { name: 'Ad-hoc Advice as Required', price: 0 }
+            ],
+            oneOffFees: [
+                { name: 'Xero Setup & Training', price: 400, desc: 'Set up and training on Xero software' },
+                { name: 'Data Migration', price: 400, desc: 'Migrate data from previous system' },
+                { name: 'Accounts Year 1', price: 1250, desc: 'Preparation of Accounts and Corporation tax return' },
+                { name: 'VAT Registration', price: 200, desc: 'VAT registration advice and application' },
+                { name: 'VAT Deregistration', price: 200, desc: 'VAT deregistration advice and application' }
+            ],
+            software: [
+                { name: 'Xero Ignite', price: 11.80 },
+                { name: 'Xero Grow', price: 39.00 },
+                { name: 'Xero Comprehensive', price: 55.00 },
+                { name: 'Dext (Receipt Bank)', price: 0 }
+            ],
+            quotes: [],
+            selectedServices: { bronze: [], silver: [], gold: [], single: [] },
+            selectedOneOff: []
+        };
+
+        // ============ LOCALSTORAGE ============
+        function loadFromStorage() {
+            const stored = localStorage.getItem('rsSalesData');
+            if (stored) {
+                try {
+                    app = JSON.parse(stored);
+                } catch (e) { console.error('Failed to load storage'); }
+            }
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('rsSalesData', JSON.stringify(app));
+            showSuccess('Saved!');
+        }
+
+        function showSuccess(msg = 'Success!') {
+            const el = document.getElementById('successMsg');
+            el.textContent = '✓ ' + msg;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 3000);
+        }
+
+        // ============ TAB SWITCHING ============
+        function switchTab(tabName, button) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
+            document.getElementById(tabName).classList.add('active');
+            button.classList.add('active');
+            if (tabName === 'quote-database') renderQuotesDatabase();
+        }
+
+        // ============ SALES MENU FUNCTIONS ============
+        let editingIdx = null;
+
+        function openServiceModal(mode, idx = null) {
+            editingIdx = idx;
+            document.getElementById('serviceName').value = '';
+            document.getElementById('servicePrice').value = '';
+            if (mode === 'edit' && idx !== null) {
+                document.getElementById('serviceName').value = app.services[idx].name;
+                document.getElementById('servicePrice').value = app.services[idx].price;
+            }
+            document.getElementById('serviceModal').style.display = 'block';
+        }
+
+        function closeServiceModal() { document.getElementById('serviceModal').style.display = 'none'; }
+
+        function saveService(e) {
+            e.preventDefault();
+            const name = document.getElementById('serviceName').value;
+            const price = parseFloat(document.getElementById('servicePrice').value) || 0;
+            if (editingIdx !== null) {
+                app.services[editingIdx] = { name, price };
+            } else {
+                app.services.push({ name, price });
+            }
+            editingIdx = null;
+            saveToStorage();
+            renderSalesMenu();
+            render3TierCheckboxes();
+            render1TierCheckboxes();
+            closeServiceModal();
+        }
+
+        function openOneOffModal(mode, idx = null) {
+            editingIdx = idx;
+            document.getElementById('oneOffName').value = '';
+            document.getElementById('oneOffPrice').value = '';
+            document.getElementById('oneOffDesc').value = '';
+            if (mode === 'edit' && idx !== null) {
+                document.getElementById('oneOffName').value = app.oneOffFees[idx].name;
+                document.getElementById('oneOffPrice').value = app.oneOffFees[idx].price;
+                document.getElementById('oneOffDesc').value = app.oneOffFees[idx].desc || '';
+            }
+            document.getElementById('oneOffModal').style.display = 'block';
+        }
+
+        function closeOneOffModal() { document.getElementById('oneOffModal').style.display = 'none'; }
+
+        function saveOneOff(e) {
+            e.preventDefault();
+            const name = document.getElementById('oneOffName').value;
+            const price = parseFloat(document.getElementById('oneOffPrice').value) || 0;
+            const desc = document.getElementById('oneOffDesc').value;
+            if (editingIdx !== null) {
+                app.oneOffFees[editingIdx] = { name, price, desc };
+            } else {
+                app.oneOffFees.push({ name, price, desc });
+            }
+            editingIdx = null;
+            saveToStorage();
+            renderSalesMenu();
+            render3TierOneOffSelection();
+            closeOneOffModal();
+        }
+
+        function openSoftwareModal(mode, idx = null) {
+            editingIdx = idx;
+            document.getElementById('softwareName').value = '';
+            document.getElementById('softwarePrice').value = '';
+            if (mode === 'edit' && idx !== null) {
+                document.getElementById('softwareName').value = app.software[idx].name;
+                document.getElementById('softwarePrice').value = app.software[idx].price;
+            }
+            document.getElementById('softwareModal').style.display = 'block';
+        }
+
+        function closeSoftwareModal() { document.getElementById('softwareModal').style.display = 'none'; }
+
+        function saveSoftware(e) {
+            e.preventDefault();
+            const name = document.getElementById('softwareName').value;
+            const price = parseFloat(document.getElementById('softwarePrice').value) || 0;
+            if (editingIdx !== null) {
+                app.software[editingIdx] = { name, price };
+            } else {
+                app.software.push({ name, price });
+            }
+            editingIdx = null;
+            saveToStorage();
+            renderSalesMenu();
+            closeModal();
+        }
+
+        function renderSalesMenu() {
+            document.getElementById('servicesTable').innerHTML = app.services.map((s, i) => `
+                <tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>+£${s.price.toFixed(2)}</td>
+                    <td>
+                        <button class="btn btn-edit btn-small" onclick="openServiceModal('edit', ${i})">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="delService(${i})">Del</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('oneOffTable').innerHTML = app.oneOffFees.map((f, i) => `
+                <tr>
+                    <td><strong>${f.name}</strong></td>
+                    <td>£${f.price.toFixed(2)}</td>
+                    <td>${f.desc || ''}</td>
+                    <td>
+                        <button class="btn btn-edit btn-small" onclick="openOneOffModal('edit', ${i})">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="delOneOff(${i})">Del</button>
+                    </td>
+                </tr>
+            `).join('');
+
+            document.getElementById('softwareTable').innerHTML = app.software.map((s, i) => `
+                <tr>
+                    <td><strong>${s.name}</strong></td>
+                    <td>£${s.price.toFixed(2)}/mo</td>
+                    <td>
+                        <button class="btn btn-edit btn-small" onclick="openSoftwareModal('edit', ${i})">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="delSoftware(${i})">Del</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function delService(i) { if (confirm('Delete?')) { app.services.splice(i, 1); saveToStorage(); renderSalesMenu(); render3TierCheckboxes(); render1TierCheckboxes(); } }
+        function delOneOff(i) { if (confirm('Delete?')) { app.oneOffFees.splice(i, 1); saveToStorage(); renderSalesMenu(); render3TierOneOffSelection(); } }
+        function delSoftware(i) { if (confirm('Delete?')) { app.software.splice(i, 1); saveToStorage(); renderSalesMenu(); } }
+
+        function closeModal() { document.getElementById('softwareModal').style.display = 'none'; }
+        window.onclick = e => { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; }
+
+        // ============ 3-TIER FUNCTIONS ============
+        function render3TierOneOffSelection() {
+            document.getElementById('c3_oneOffSelection').innerHTML = app.oneOffFees.map((f, i) => `
+                <div class="service-checkbox">
+                    <input type="checkbox" id="c3_oneOff_${i}" onchange="update3TierPrice('bronze'); update3TierPrice('silver'); update3TierPrice('gold');">
+                    <label for="c3_oneOff_${i}"><strong>${f.name}</strong> — £${f.price.toFixed(2)} <span style="color: #999;">${f.desc}</span></label>
+                </div>
+            `).join('');
+        }
+
+        function render3TierCheckboxes() {
+            ['bronze', 'silver', 'gold'].forEach(tier => {
+                document.getElementById(`c3_${tier}Checkboxes`).innerHTML = app.services.map((s, i) => `
+                    <div class="service-checkbox">
+                        <input type="checkbox" id="c3_${tier}_${i}" onchange="update3TierPrice('${tier}')">
+                        <label for="c3_${tier}_${i}">${s.name} <span style="color: #999;">(+£${s.price.toFixed(2)})</span></label>
+                    </div>
+                `).join('');
+            });
+        }
+
+        function update3TierPrice(tier) {
+            const base = parseInt(document.getElementById(`c3_${tier}Base`).value) || 0;
+            let total = base;
+            const selected = [];
+
+            app.services.forEach((s, i) => {
+                const cb = document.getElementById(`c3_${tier}_${i}`);
+                if (cb && cb.checked) {
+                    total += s.price;
+                    selected.push(s.name);
+                }
+            });
+
+            app.selectedServices[tier] = selected;
+
+            const el = document.getElementById(`c3_${tier}Price`);
+            el.innerHTML = `
+                <div class="price-row"><span>Base Price</span><span>£${base.toFixed(2)}</span></div>
+                ${selected.map(s => {
+                    const svc = app.services.find(x => x.name === s);
+                    return `<div class="price-row"><span>${s}</span><span>+£${svc.price.toFixed(2)}</span></div>`;
+                }).join('')}
+                <div class="price-row total"><span>MONTHLY</span><span>£${total.toFixed(2)}</span></div>
+                <div class="price-row annual"><span>ANNUAL (×12)</span><span>£${(total * 12).toFixed(2)}</span></div>
+            `;
+        }
+
+        function generate3TierProposal() {
+            const client = document.getElementById('c3_clientName').value.trim();
+            const contact = document.getElementById('c3_contactName').value.trim();
+            const email = document.getElementById('c3_clientEmail').value.trim();
+            const biz = document.getElementById('c3_businessType').value;
+            const turnover = document.getElementById('c3_turnover').value.trim();
+            const position = document.getElementById('c3_clientPosition').value.trim();
+            const rec = document.getElementById('c3_recommendation').value.trim();
+
+            if (!client || !biz) { alert('Client name & type required'); return; }
+
+            const bronze = parseInt(document.getElementById('c3_bronzeBase').value) || 199;
+            const silver = parseInt(document.getElementById('c3_silverBase').value) || 299;
+            const gold = parseInt(document.getElementById('c3_goldBase').value) || 399;
+
+            const calcPrice = (base, tier) => {
+                let t = base;
+                app.selectedServices[tier].forEach(n => {
+                    const s = app.services.find(x => x.name === n);
+                    if (s) t += s.price;
+                });
+                return t;
+            };
+
+            const bPrice = calcPrice(bronze, 'bronze');
+            const sPrice = calcPrice(silver, 'silver');
+            const gPrice = calcPrice(gold, 'gold');
+
+            const doc = new docx.Document({
+                sections: [{
+                    children: [
+                        new docx.Paragraph({ text: 'Proposal prepared specially for', spacing: { after: 100 } }),
+                        new docx.Paragraph({ text: client, style: 'Heading1', spacing: { after: 200 } }),
+                        new docx.Paragraph({ text: 'Accounting and Taxation Services', spacing: { after: 100 } }),
+                        new docx.Paragraph({ text: new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }), spacing: { after: 400 } }),
+
+                        ...(position ? [
+                            new docx.Paragraph({ text: 'Position', style: 'Heading2', spacing: { before: 200, after: 100 } }),
+                            new docx.Paragraph({ text: position, spacing: { after: 400 } })
+                        ] : []),
+
+                        ...(rec ? [
+                            new docx.Paragraph({ text: 'Recommendation', style: 'Heading2', spacing: { before: 200, after: 100 } }),
+                            new docx.Paragraph({ text: rec, spacing: { after: 400 } })
+                        ] : []),
+
+                        new docx.Paragraph({ text: 'One-Off Costs', style: 'Heading2', spacing: { before: 200, after: 100 } }),
+                        ...app.oneOffFees.map((f, i) => {
+                            const cb = document.getElementById(`c3_oneOff_${i}`);
+                            if (!cb || !cb.checked) return null;
+                            return new docx.Paragraph({
+                                text: `${f.name} — £${f.price.toFixed(2)} + VAT${f.desc ? ' (' + f.desc + ')' : ''}`,
+                                spacing: { after: 50 },
+                                bullet: { level: 0 }
+                            });
+                        }).filter(Boolean),
+                        new docx.Paragraph({ text: '', spacing: { after: 200 } }),
+
+                        new docx.Paragraph({ text: 'Your Options', style: 'Heading2', spacing: { before: 200, after: 200 } }),
+
+                        new docx.Paragraph({ text: `🥉 BRONZE SERVICE — £${bPrice.toFixed(2)}/month + VAT (£${(bPrice * 12).toFixed(2)}/year)`, style: 'Heading3', spacing: { before: 100, after: 50 } }),
+                        new docx.Paragraph({ text: 'Includes:', spacing: { after: 100 } }),
+                        ...app.selectedServices.bronze.map(s => new docx.Paragraph({ text: s, spacing: { after: 50 }, bullet: { level: 0 } })),
+                        new docx.Paragraph({ text: '', spacing: { after: 200 } }),
+
+                        new docx.Paragraph({ text: `🥈 SILVER SERVICE — £${sPrice.toFixed(2)}/month + VAT (£${(sPrice * 12).toFixed(2)}/year)`, style: 'Heading3', spacing: { before: 100, after: 50 } }),
+                        new docx.Paragraph({ text: 'Includes:', spacing: { after: 100 } }),
+                        ...app.selectedServices.silver.map(s => new docx.Paragraph({ text: s, spacing: { after: 50 }, bullet: { level: 0 } })),
+                        new docx.Paragraph({ text: '', spacing: { after: 200 } }),
+
+                        new docx.Paragraph({ text: `🥇 GOLD SERVICE — £${gPrice.toFixed(2)}/month + VAT (£${(gPrice * 12).toFixed(2)}/year)`, style: 'Heading3', spacing: { before: 100, after: 50 } }),
+                        new docx.Paragraph({ text: 'Includes:', spacing: { after: 100 } }),
+                        ...app.selectedServices.gold.map(s => new docx.Paragraph({ text: s, spacing: { after: 50 }, bullet: { level: 0 } })),
+                        new docx.Paragraph({ text: '', spacing: { after: 200 } }),
+
+                        new docx.Paragraph({ text: 'Summary Options', style: 'Heading2', spacing: { before: 200, after: 100 } }),
+                        generateComparisonTable(),
+
+                        new docx.Paragraph({ text: 'Your Guarantee', style: 'Heading2', spacing: { before: 200, after: 100 } }),
+                        new docx.Paragraph({ text: 'All fees are monthly and subject to VAT at the prevailing rate. This proposal is valid for 30 days.', spacing: { after: 400 } }),
+
+                        new docx.Paragraph({ text: 'Kind Regards,', spacing: { before: 200, after: 200 } }),
+                        new docx.Paragraph({ text: 'RS Partnership', spacing: { after: 50 } })
+                    ],
+                    margins: { top: 720, right: 720, bottom: 720, left: 720 }
+                }]
+            });
+
+            docx.Packer.toBlob(doc).then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${client.replace(/\s+/g, '_')}_Proposal_3Tier.docx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showSuccess('Word doc generated!');
+            });
+        }
+
+        function generateComparisonTable() {
+            const allSvcs = new Set([...app.selectedServices.bronze, ...app.selectedServices.silver, ...app.selectedServices.gold]);
+            const rows = [
+                new docx.TableRow({
+                    children: [
+                        new docx.TableCell({ children: [new docx.Paragraph({ text: 'SERVICE', style: 'Strong' })] }),
+                        new docx.TableCell({ children: [new docx.Paragraph({ text: 'BRONZE', style: 'Strong' })] }),
+                        new docx.TableCell({ children: [new docx.Paragraph({ text: 'SILVER', style: 'Strong' })] }),
+                        new docx.TableCell({ children: [new docx.Paragraph({ text: 'GOLD', style: 'Strong' })] })
+                    ]
+                })
+            ];
+            allSvcs.forEach(s => {
+                rows.push(new docx.TableRow({
+                    children: [
+                        new docx.TableCell({ children: [new docx.Paragraph({ text: s })] }),
+                        new docx.TableCell({ children: [new docx.Paragraph({ text: app.selectedServices.bronze.includes(s) ? '✓' : '' })] }),
+                        new docx.TableCell({ children: [new docx.Paragraph({ text: app.selectedServices.silver.includes(s) ? '✓' : '' })] }),
+                        new docx.TableCell({ children: [new docx.Paragraph({ text: app.selectedServices.gold.includes(s) ? '✓' : '' })] })
+                    ]
+                }));
+            });
+            return new docx.Table({ rows, width: { size: 100, type: 'pct' } });
+        }
+
+        function save3TierQuote() {
+            const client = document.getElementById('c3_clientName').value.trim();
+            if (!client) { alert('Enter client name'); return; }
+            
+            const bronze = parseInt(document.getElementById('c3_bronzeBase').value) || 199;
+            const calcPrice = (base, tier) => {
+                let t = base;
+                app.selectedServices[tier].forEach(n => {
+                    const s = app.services.find(x => x.name === n);
+                    if (s) t += s.price;
+                });
+                return t;
+            };
+
+            const quote = {
+                id: Date.now(),
+                type: '3-tier',
+                clientName: client,
+                date: new Date().toLocaleDateString(),
+                status: 'Draft',
+                businessType: document.getElementById('c3_businessType').value,
+                prices: {
+                    bronze: calcPrice(bronze, 'bronze'),
+                    silver: calcPrice(parseInt(document.getElementById('c3_silverBase').value) || 299, 'silver'),
+                    gold: calcPrice(parseInt(document.getElementById('c3_goldBase').value) || 399, 'gold')
+                },
+                data: {
+                    contactName: document.getElementById('c3_contactName').value,
+                    email: document.getElementById('c3_clientEmail').value,
+                    phone: document.getElementById('c3_clientPhone').value,
+                    turnover: document.getElementById('c3_turnover').value,
+                    position: document.getElementById('c3_clientPosition').value,
+                    recommendation: document.getElementById('c3_recommendation').value,
+                    services: app.selectedServices,
+                    bases: {
+                        bronze: bronze,
+                        silver: parseInt(document.getElementById('c3_silverBase').value) || 299,
+                        gold: parseInt(document.getElementById('c3_goldBase').value) || 399
+                    }
+                }
+            };
+
+            app.quotes.push(quote);
+            saveToStorage();
+            showSuccess('Quote saved!');
+            clear3TierForm();
+        }
+
+        function clear3TierForm() {
+            document.getElementById('c3_clientName').value = '';
+            document.getElementById('c3_contactName').value = '';
+            document.getElementById('c3_clientEmail').value = '';
+            document.getElementById('c3_clientPhone').value = '';
+            document.getElementById('c3_businessType').value = '';
+            document.getElementById('c3_turnover').value = '';
+            document.getElementById('c3_clientPosition').value = '';
+            document.getElementById('c3_recommendation').value = '';
+            app.selectedServices = { bronze: [], silver: [], gold: [], single: [] };
+            render3TierCheckboxes();
+            ['bronze', 'silver', 'gold'].forEach(t => update3TierPrice(t));
+        }
+
+        // ============ SINGLE-TIER FUNCTIONS ============
+        function render1TierCheckboxes() {
+            document.getElementById('c1_checkboxes').innerHTML = app.services.map((s, i) => `
+                <div class="service-checkbox">
+                    <input type="checkbox" id="c1_svc_${i}" onchange="update1TierPrice()">
+                    <label for="c1_svc_${i}">${s.name} <span style="color: #999;">(+£${s.price.toFixed(2)})</span></label>
+                </div>
+            `).join('');
+        }
+
+        function update1TierPrice() {
+            const base = parseInt(document.getElementById('c1_basePrice').value) || 299;
+            let total = base;
+            const selected = [];
+
+            app.services.forEach((s, i) => {
+                const cb = document.getElementById(`c1_svc_${i}`);
+                if (cb && cb.checked) {
+                    total += s.price;
+                    selected.push(s.name);
+                }
+            });
+
+            app.selectedServices.single = selected;
+
+            const el = document.getElementById('c1_pricePreview');
+            el.innerHTML = `
+                <div class="price-row"><span>Base Price</span><span>£${base.toFixed(2)}</span></div>
+                ${selected.map(s => {
+                    const svc = app.services.find(x => x.name === s);
+                    return `<div class="price-row"><span>${s}</span><span>+£${svc.price.toFixed(2)}</span></div>`;
+                }).join('')}
+                <div class="price-row total"><span>MONTHLY</span><span>£${total.toFixed(2)}</span></div>
+                <div class="price-row annual"><span>ANNUAL (×12)</span><span>£${(total * 12).toFixed(2)}</span></div>
+            `;
+        }
+
+        function generate1TierProposal() {
+            const client = document.getElementById('c1_clientName').value.trim();
+            const biz = document.getElementById('c1_businessType').value;
+
+            if (!client || !biz) { alert('Client name & type required'); return; }
+
+            const pkg = document.getElementById('c1_packageName').value || 'Service Package';
+            const base = parseInt(document.getElementById('c1_basePrice').value) || 299;
+            let total = base;
+
+            app.services.forEach((s, i) => {
+                const cb = document.getElementById(`c1_svc_${i}`);
+                if (cb && cb.checked) total += s.price;
+            });
+
+            const doc = new docx.Document({
+                sections: [{
+                    children: [
+                        new docx.Paragraph({ text: 'Proposal prepared specially for', spacing: { after: 100 } }),
+                        new docx.Paragraph({ text: client, style: 'Heading1', spacing: { after: 200 } }),
+                        new docx.Paragraph({ text: 'Accounting and Taxation Services', spacing: { after: 100 } }),
+                        new docx.Paragraph({ text: new Date().toLocaleDateString('en-GB', { year: 'numeric', month: 'long', day: 'numeric' }), spacing: { after: 400 } }),
+
+                        new docx.Paragraph({ text: 'Your Position', style: 'Heading2', spacing: { before: 200, after: 100 } }),
+                        new docx.Paragraph({ text: `As a ${biz}, we provide comprehensive accounting and tax services.`, spacing: { after: 400 } }),
+
+                        new docx.Paragraph({ text: pkg, style: 'Heading2', spacing: { before: 200, after: 50 } }),
+                        new docx.Paragraph({ text: `£${total.toFixed(2)}/month + VAT (£${(total * 12).toFixed(2)}/year)`, style: 'Heading3', spacing: { after: 100 } }),
+                        new docx.Paragraph({ text: 'Includes:', spacing: { after: 100 } }),
+                        ...app.selectedServices.single.map(s => new docx.Paragraph({ text: s, spacing: { after: 50 }, bullet: { level: 0 } })),
+
+                        new docx.Paragraph({ text: 'All fees are monthly and subject to VAT at the prevailing rate. This proposal is valid for 30 days.', spacing: { before: 200, after: 400 } }),
+
+                        new docx.Paragraph({ text: 'Kind Regards,', spacing: { before: 200, after: 200 } }),
+                        new docx.Paragraph({ text: 'RS Partnership', spacing: { after: 50 } })
+                    ],
+                    margins: { top: 720, right: 720, bottom: 720, left: 720 }
+                }]
+            });
+
+            docx.Packer.toBlob(doc).then(blob => {
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${client.replace(/\s+/g, '_')}_Proposal_SingleTier.docx`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showSuccess('Word doc generated!');
+            });
+        }
+
+        function save1TierQuote() {
+            const client = document.getElementById('c1_clientName').value.trim();
+            if (!client) { alert('Enter client name'); return; }
+            
+            const base = parseInt(document.getElementById('c1_basePrice').value) || 299;
+            let total = base;
+            app.services.forEach((s, i) => {
+                const cb = document.getElementById(`c1_svc_${i}`);
+                if (cb && cb.checked) total += s.price;
+            });
+
+            const quote = {
+                id: Date.now(),
+                type: 'single',
+                clientName: client,
+                date: new Date().toLocaleDateString(),
+                status: 'Draft',
+                businessType: document.getElementById('c1_businessType').value,
+                price: total,
+                data: {
+                    packageName: document.getElementById('c1_packageName').value,
+                    contactName: document.getElementById('c1_contactName').value,
+                    email: document.getElementById('c1_clientEmail').value,
+                    phone: document.getElementById('c1_clientPhone').value,
+                    turnover: document.getElementById('c1_turnover').value,
+                    position: document.getElementById('c1_clientPosition').value,
+                    recommendation: document.getElementById('c1_recommendation').value,
+                    services: app.selectedServices.single,
+                    basePrice: base
+                }
+            };
+
+            app.quotes.push(quote);
+            saveToStorage();
+            showSuccess('Quote saved!');
+            clear1TierForm();
+        }
+
+        function clear1TierForm() {
+            document.getElementById('c1_clientName').value = '';
+            document.getElementById('c1_contactName').value = '';
+            document.getElementById('c1_clientEmail').value = '';
+            document.getElementById('c1_clientPhone').value = '';
+            document.getElementById('c1_businessType').value = '';
+            document.getElementById('c1_turnover').value = '';
+            document.getElementById('c1_clientPosition').value = '';
+            document.getElementById('c1_recommendation').value = '';
+            document.getElementById('c1_packageName').value = 'Standard Service Package';
+            document.getElementById('c1_basePrice').value = '299';
+            app.selectedServices.single = [];
+            render1TierCheckboxes();
+            update1TierPrice();
+        }
+
+        // ============ QUOTE DATABASE ============
+        function renderQuotesDatabase() {
+            if (app.quotes.length === 0) {
+                document.getElementById('quotesContainer').innerHTML = '<p style="text-align: center; color: #999;">No quotes saved yet. Create and save a proposal to see it here.</p>';
+                return;
+            }
+
+            document.getElementById('quotesContainer').innerHTML = app.quotes.map((q, i) => `
+                <div class="quote-item">
+                    <div class="quote-info">
+                        <h4>${q.clientName}</h4>
+                        <p><strong>${q.type === '3-tier' ? '3-Tier' : 'Single Tier'}</strong> • ${q.businessType || 'N/A'}</p>
+                        <p>${q.date}</p>
+                        ${q.type === '3-tier' ? `
+                            <p>Prices: Bronze £${q.prices.bronze.toFixed(2)} | Silver £${q.prices.silver.toFixed(2)} | Gold £${q.prices.gold.toFixed(2)}</p>
+                        ` : `
+                            <p>Price: £${q.price.toFixed(2)}/month</p>
+                        `}
+                    </div>
+                    <div>
+                        <select onchange="updateQuoteStatus(${i}, this.value)">
+                            <option value="Draft" ${q.status === 'Draft' ? 'selected' : ''}>Draft</option>
+                            <option value="Sent" ${q.status === 'Sent' ? 'selected' : ''}>Sent</option>
+                            <option value="Agreed" ${q.status === 'Agreed' ? 'selected' : ''}>Agreed</option>
+                        </select>
+                        <span class="status-badge status-${q.status.toLowerCase()}">${q.status}</span>
+                    </div>
+                    <div class="quote-actions">
+                        <button class="btn btn-edit btn-small" onclick="loadQuoteToEdit(${i})">Load</button>
+                        <button class="btn btn-secondary btn-small" onclick="duplicateQuote(${i})">Clone</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteQuote(${i})">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updateQuoteStatus(i, status) {
+            app.quotes[i].status = status;
+            saveToStorage();
+            renderQuotesDatabase();
+        }
+
+        function deleteQuote(i) {
+            if (confirm('Delete this quote?')) {
+                app.quotes.splice(i, 1);
+                saveToStorage();
+                renderQuotesDatabase();
+                showSuccess('Quote deleted');
+            }
+        }
+
+        function duplicateQuote(i) {
+            const q = JSON.parse(JSON.stringify(app.quotes[i]));
+            q.id = Date.now();
+            q.date = new Date().toLocaleDateString();
+            q.status = 'Draft';
+            app.quotes.push(q);
+            saveToStorage();
+            renderQuotesDatabase();
+            showSuccess('Quote cloned');
+        }
+
+        function loadQuoteToEdit(i) {
+            const q = app.quotes[i];
+            if (q.type === '3-tier') {
+                switchTab('three-tier', document.querySelectorAll('.tab-button')[1]);
+                document.getElementById('c3_clientName').value = q.clientName;
+                document.getElementById('c3_contactName').value = q.data.contactName || '';
+                document.getElementById('c3_clientEmail').value = q.data.email || '';
+                document.getElementById('c3_clientPhone').value = q.data.phone || '';
+                document.getElementById('c3_businessType').value = q.businessType;
+                document.getElementById('c3_turnover').value = q.data.turnover || '';
+                document.getElementById('c3_clientPosition').value = q.data.position || '';
+                document.getElementById('c3_recommendation').value = q.data.recommendation || '';
+                document.getElementById('c3_bronzeBase').value = q.data.bases.bronze;
+                document.getElementById('c3_silverBase').value = q.data.bases.silver;
+                document.getElementById('c3_goldBase').value = q.data.bases.gold;
+
+                render3TierCheckboxes();
+                render3TierOneOffSelection();
+                
+                ['bronze', 'silver', 'gold'].forEach(tier => {
+                    q.data.services[tier].forEach(name => {
+                        const idx = app.services.findIndex(s => s.name === name);
+                        if (idx !== -1) document.getElementById(`c3_${tier}_${idx}`).checked = true;
+                    });
+                    update3TierPrice(tier);
+                });
+            } else {
+                switchTab('single-tier', document.querySelectorAll('.tab-button')[2]);
+                document.getElementById('c1_clientName').value = q.clientName;
+                document.getElementById('c1_contactName').value = q.data.contactName || '';
+                document.getElementById('c1_clientEmail').value = q.data.email || '';
+                document.getElementById('c1_clientPhone').value = q.data.phone || '';
+                document.getElementById('c1_businessType').value = q.businessType;
+                document.getElementById('c1_turnover').value = q.data.turnover || '';
+                document.getElementById('c1_packageName').value = q.data.packageName || 'Service Package';
+                document.getElementById('c1_basePrice').value = q.data.basePrice;
+                document.getElementById('c1_clientPosition').value = q.data.position || '';
+                document.getElementById('c1_recommendation').value = q.data.recommendation || '';
+
+                render1TierCheckboxes();
+                q.data.services.forEach(name => {
+                    const idx = app.services.findIndex(s => s.name === name);
+                    if (idx !== -1) document.getElementById(`c1_svc_${idx}`).checked = true;
+                });
+                update1TierPrice();
+            }
+            showSuccess('Quote loaded!');
+        }
+
+        function exportAllQuotes() {
+            const json = JSON.stringify(app.quotes, null, 2);
+            const blob = new Blob([json], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `rs_quotes_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showSuccess('Quotes exported!');
+        }
+
+        function triggerImportQuotes() {
+            document.getElementById('importFile').click();
+        }
+
+        function importAllQuotes(e) {
+            const f = e.target.files[0];
+            if (!f) return;
+            const r = new FileReader();
+            r.onload = (ev) => {
+                try {
+                    const imported = JSON.parse(ev.target.result);
+                    if (Array.isArray(imported)) {
+                        app.quotes = [...app.quotes, ...imported];
+                        saveToStorage();
+                        renderQuotesDatabase();
+                        showSuccess('Quotes imported!');
+                    } else {
+                        alert('Invalid file');
+                    }
+                } catch (err) {
+                    alert('Failed to parse file');
+                }
+            };
+            r.readAsText(f);
+        }
+
+        // ============ INIT ============
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFromStorage();
+            renderSalesMenu();
+            render3TierCheckboxes();
+            render3TierOneOffSelection();
+            render1TierCheckboxes();
+            ['bronze', 'silver', 'gold'].forEach(t => update3TierPrice(t));
+            update1TierPrice();
+        });
+    </script>
+</body>
+</html>
